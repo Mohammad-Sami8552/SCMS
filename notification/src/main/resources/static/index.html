@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Notification System</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Realtime Notification Dashboard</h1>
+
+<div class="container">
+
+    <div class="box">
+        <h2>1. Initialize Subscriber Connection</h2>
+
+        <label for="current-user">Assign Your Current User ID:</label>
+        <input type="number" id="current-user" value="1">
+
+        <button onclick="connectWebSocket()">Connect to Live Stream</button>
+
+        <h3>Incoming Active Alerts</h3>
+        <ul id="notifications-display"></ul>
+    </div>
+
+    <div class="box">
+        <h2>2. Dispatch New API Notification Request</h2>
+
+        <label for="target-user">Target User ID (Who should receive this?):</label>
+        <input type="number" id="target-user" value="1">
+
+        <label for="msg">Message Context:</label>
+        <textarea id="msg" rows="3" placeholder="Type notification context content here..."></textarea>
+
+        <button onclick="sendNotificationViaRest()">Post HTTP API Notification</button>
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
