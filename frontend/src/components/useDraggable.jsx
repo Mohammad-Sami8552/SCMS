@@ -9,7 +9,7 @@ export default function useDraggable(elRef, handleRef) {
     const element = elRef.current;
     if (!handle || !element) return;
 
-    // Apply native hardware alignment values cleanly to absolute layout plane
+  
     element.style.position = 'fixed';
     element.style.margin = '0';
     element.style.transform = 'translate(0px, 0px)';
@@ -22,7 +22,6 @@ export default function useDraggable(elRef, handleRef) {
       const nextY = e.clientY - startY;
 
       coords.current = { x: nextX, y: nextY };
-      // Direct high-speed hardware-accelerated style injection (Bypasses React lag)
       element.style.transform = `translate(${nextX}px, ${nextY}px)`;
     };
 
@@ -33,7 +32,7 @@ export default function useDraggable(elRef, handleRef) {
     };
 
     const onMouseDown = (e) => {
-      if (e.button !== 0) return; // Disregard right/scroll wheel click clicks
+      if (e.button !== 0) return; 
       if (['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON', 'OPTION'].includes(e.target.tagName)) return;
 
       e.preventDefault();

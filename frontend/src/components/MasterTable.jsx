@@ -3,7 +3,7 @@ import React from 'react';
 export default function MasterTable({ activeTab, search, datasets, setModalType, setSelectedRecord }) {
   const { stores, employees, materials, suppliers, manufacturers } = datasets;
 
-  // SAFE REAL-TIME FILTERING SCANNERS: Custom targeted scans across accurate unique properties
+
   const getFilteredRows = (dataset, searchKey) => {
     if (!Array.isArray(dataset)) return [];
     if (!search.trim()) return dataset;

@@ -5,7 +5,7 @@ import MetricsRibbon from './components/MetricsRibbon';
 import MasterTable from './components/MasterTable';
 import useDraggable from './components/useDraggable';
 
-// --- STABLE HARDWARE ACCELERATED MODAL WRAPPER ---
+
 function DraggableModal({ title, onClose, children, width = '550px' }) {
   const modalRef = useRef(null);
   const headerRef = useRef(null);
@@ -13,7 +13,6 @@ function DraggableModal({ title, onClose, children, width = '550px' }) {
 
   return (
     <div className="modal-overlay">
-      {/* Absolute positional offsets provide clean structural center coordinates for drifting anchors */}
       <div ref={modalRef} className="modal-content" style={{ width, top: '25%', left: '35%' }}>
         <div ref={headerRef} className="modal-header">
           <h3>{title}</h3>
@@ -35,7 +34,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('store'); 
   const [search, setSearch] = useState('');
   
-  // Data State Repositories
+
   const [stores, setStores] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [materials, setMaterials] = useState([]);
@@ -45,7 +44,7 @@ export default function App() {
   const [modalType, setModalType] = useState(null); 
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  // Form Field State Trackers
+ 
   const [storeForm, setStoreForm] = useState({ store_code: '', store_name: '', store_type: 'BLOCK', officer_name: '', officer_mobile: '', officer_email: '' });
   const [empForm, setEmpForm] = useState({ emp_name: '', emp_designation: '', emp_contact_no: '', emp_emailid: '', store_code: '' });
   const [materialForm, setMaterialForm] = useState({ material_id: '', material_code: '', material_description: '', bis_code: '', hsn_code: '' });
@@ -138,7 +137,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* ==================== HIGH PERFORMANCE FORM MODALS ==================== */}
       
       {modalType === 'addStore' && (
         <DraggableModal title="Add New Store Hub" onClose={() => setModalType(null)}>
@@ -184,7 +182,13 @@ export default function App() {
           </div>
           <div className="modal-footer">
             <button className="btn-util" onClick={() => setModalType(null)}>Cancel</button>
-            <button className="action-btn-green" onClick={() => handleFormSubmit('materials', materialForm)}>Save Material</button>
+            <button className="action-btn-green" onClick={() => {
+              const formattedMaterial = {
+                ...materialForm,
+                material_id: parseInt(materialForm.material_id, 10)
+              };
+                handleFormSubmit('materials', formattedMaterial);
+              }}>Save Material</button>
           </div>
         </DraggableModal>
       )}
@@ -201,7 +205,13 @@ export default function App() {
           </div>
           <div className="modal-footer">
             <button className="btn-util" onClick={() => setModalType(null)}>Cancel</button>
-            <button className="action-btn-green" onClick={() => handleFormSubmit('suppliers', vendorForm)}>Save Vendor</button>
+            <button className="action-btn-green" onClick={() => {
+              const formattedVendor = {
+                ...vendorForm,
+                supplier_id: parseInt(vendorForm.supplier_id,10)
+              };
+              handleFormSubmit('suppliers', formattedVendor)
+              }}>Save Vendor</button>
           </div>
         </DraggableModal>
       )}
@@ -216,7 +226,13 @@ export default function App() {
           </div>
           <div className="modal-footer">
             <button className="btn-util" onClick={() => setModalType(null)}>Cancel</button>
-            <button className="action-btn-green" onClick={() => handleFormSubmit('manufacturers', mnfForm)}>Save Manufacturer</button>
+            <button className="action-btn-green" onClick={() => {
+              const formattedMnf = {
+                ...mnfForm,
+                mnf_id: parseInt(mnfForm.mnf_id, 10)
+              };
+              handleFormSubmit('manufacturers', formattedMnf)
+              }}>Save Manufacturer</button>
           </div>
         </DraggableModal>
       )}

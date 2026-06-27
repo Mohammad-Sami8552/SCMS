@@ -11,14 +11,14 @@ app.use(express.json());
 const pool = new Pool({
   user: process.env.DB_USER || 'postgres',
   host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'project', // Points directly to your 'project' database
+  database: process.env.DB_NAME || 'project', 
   password: process.env.DB_PASSWORD || '123456789', 
   port: process.env.DB_PORT || 5432,
 });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'SCMS_SECURITY_ENFORCEMENT_KEY_2026';
 
-// Session Authorization Middleware Tracker
+
 const authenticate = (req, res, next) => {
   const token = req.header('Authorization')?.split(' ')[1];
   if (!token || token === 'null' || token === 'undefined') return res.status(401).json({ message: 'Access Denied' });
@@ -28,13 +28,12 @@ const authenticate = (req, res, next) => {
   } catch { res.status(401).json({ message: 'Invalid Session Token' }); }
 };
 
-// Security CAPTCHA Text Generator
+
 app.get('/api/auth/captcha', (req, res) => {
   const text = Math.random().toString(36).substring(2, 8).toUpperCase();
   res.json({ text });
 });
 
-// Dual-Method Login Framework Integration Route (Password & OTP Bypass fallback)
 app.post('/api/auth/login', async (req, res) => {
   const { username, password, otp, authMode, captchaText, actualCaptcha } = req.body;
 
@@ -54,7 +53,6 @@ app.post('/api/auth/login', async (req, res) => {
     if (authMode === 'password') {
       if (password !== user.pwd) return res.status(401).json({ message: 'Invalid credentials.' });
     } else if (authMode === 'otp') {
-      // Sandbox bypass code configuration or direct profile value matching
       if (otp !== '123456' && otp !== user.otp) {
         return res.status(401).json({ message: 'Invalid dynamic OTP token entered.' });
       }
@@ -67,7 +65,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// GET endpoints for masters data
+
 app.get('/api/admin/stores', authenticate, async (req, res) => {
   try {
     const data = await pool.query('SELECT * FROM masters.mas_store_details ORDER BY store_id ASC');
@@ -103,7 +101,7 @@ app.get('/api/admin/manufacturers', authenticate, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST paths for individual tab creations
+
 app.post('/api/admin/stores', authenticate, async (req, res) => {
   const { store_code, store_name, store_type, officer_incharger_name, officer_incharger_mobile_no, officer_incharger_email } = req.body;
   try {
@@ -127,39 +125,81 @@ app.post('/api/admin/employees', authenticate, async (req, res) => {
 });
 
 app.post('/api/admin/materials', authenticate, async (req, res) => {
-  const { material_id, material_code, material_description, bis_code, hsn_code } = req.body;
+  const { material_code, material_description, bis_code, hsn_code } = req.body; 
+  
+  if (!material_code || !material_description) {
+    return res.status(400).json({ error: "Missing mandatory fields: code or description." });
+  }
+
   try {
+   
     await pool.query(
-      'INSERT INTO masters.mas_material (material_id, material_code, material_description, bis_code, hsn_code) VALUES ($1, $2, $3, $4, $5)',
-      [material_id, material_code, material_description, bis_code, hsn_code]
+      'INSERT INTO masters.mas_material (material_code, material_description, bis_code, hsn_code) VALUES ($1, $2, $3, $4)',
+      [
+        material_code.trim(), 
+        material_description.trim(), 
+        bis_code ? bis_code.trim() : null, 
+        hsn_code ? hsn_code.trim() : null
+      ]
     );
     res.sendStatus(211);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { 
+    console.error("Database Error in Materials Write:", err.message);
+    res.status(500).json({ error: err.message }); 
+  }
 });
+
 
 app.post('/api/admin/suppliers', authenticate, async (req, res) => {
-  const { supplier_id, supplier_name, supplier_description, supplier_address, supplier_contact_no, supplier_email } = req.body;
+  const { supplier_name, supplier_description, supplier_address, supplier_contact_no, supplier_email } = req.body;
+  
+  if (!supplier_name) {
+    return res.status(400).json({ error: "Missing mandatory fields: supplier_name." });
+  }
+
   try {
+    
     await pool.query(
-      'INSERT INTO masters.mas_supplier (supplier_id, supplier_name, supplier_description, supplier_address, supplier_contact_no, supplier_email) VALUES ($1, $2, $3, $4, $5, $6)',
-      [supplier_id, supplier_name, supplier_description, supplier_address, supplier_contact_no, supplier_email]
+      'INSERT INTO masters.mas_supplier (supplier_name, supplier_description, supplier_address, supplier_contact_no, supplier_email) VALUES ($1, $2, $3, $4, $5)',
+      [
+        supplier_name.trim(), 
+        supplier_description ? supplier_description.trim() : null, 
+        supplier_address ? supplier_address.trim() : null, 
+        supplier_contact_no ? supplier_contact_no.trim() : null, 
+        supplier_email ? supplier_email.trim() : null
+      ]
     );
     res.sendStatus(211);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { 
+    console.error("Database Error in Suppliers Write:", err.message);
+    res.status(500).json({ error: err.message }); 
+  }
 });
+
 
 app.post('/api/admin/manufacturers', authenticate, async (req, res) => {
-  const { mnf_id, mnf_name, address, web_site } = req.body;
+  const { mnf_name, address, web_site } = req.body; 
+  
+  if (!mnf_name) {
+    return res.status(400).json({ error: "Missing mandatory fields: mnf_name." });
+  }
+
   try {
     await pool.query(
-      'INSERT INTO masters.mas_manufacturer (mnf_id, mnf_name, address, web_site) VALUES ($1, $2, $3)',
-      [mnf_id, mnf_name, address, web_site]
+      'INSERT INTO masters.mas_manufacturer (mnf_name, address, web_site) VALUES ($1, $2, $3)',
+      [
+        mnf_name.trim(), 
+        address ? address.trim() : null, 
+        web_site ? web_site.trim() : null
+      ]
     );
     res.sendStatus(211);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { 
+    console.error("Database Error in Manufacturers Write:", err.message);
+    res.status(500).json({ error: err.message }); 
+  }
 });
 
-// Mock Route arrays for inactive sidebar pages
 app.get('/api/transactions/ledgers', authenticate, (req, res) => res.json([]));
 app.get('/api/planning/proposals', authenticate, (req, res) => res.json([]));
 app.get('/api/admin/rates', authenticate, (req, res) => res.json([]));
