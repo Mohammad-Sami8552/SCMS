@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Login from './pages/Login'; 
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Sidebar from './components/Sidebar';
 import MetricsRibbon from './components/MetricsRibbon';
 import MasterTable from './components/MasterTable';
@@ -29,6 +30,7 @@ export default function App() {
     const savedToken = localStorage.getItem('scms_token');
     return (!savedToken || savedToken === 'null' || savedToken === 'undefined') ? null : savedToken;
   });
+  const [authView, setAuthView] = useState('login');
 
   const [currentMenu, setCurrentMenu] = useState('store-config'); 
   const [activeTab, setActiveTab] = useState('store'); 
@@ -55,17 +57,17 @@ export default function App() {
     if (!token || token === 'null' || token === '') return;
     const headers = { 'Authorization': `Bearer ${token}` };
     
-    fetch('http://localhost:8080/api/admin/stores', { headers }).then(res => res.json()).then(d => setStores(d));
-    fetch('http://localhost:8080/api/admin/employees', { headers }).then(res => res.json()).then(d => setEmployees(d));
-    fetch('http://localhost:8080/api/admin/materials', { headers }).then(res => res.json()).then(d => setMaterials(d));
-    fetch('http://localhost:8080/api/admin/suppliers', { headers }).then(res => res.json()).then(d => setSuppliers(d));
-    fetch('http://localhost:8080/api/admin/manufacturers', { headers }).then(res => res.json()).then(d => setManufacturers(d));
+    fetch('/api/admin/stores', { headers }).then(res => res.json()).then(d => setStores(d));
+    fetch('/api/admin/employees', { headers }).then(res => res.json()).then(d => setEmployees(d));
+    fetch('/api/admin/materials', { headers }).then(res => res.json()).then(d => setMaterials(d));
+    fetch('/api/admin/suppliers', { headers }).then(res => res.json()).then(d => setSuppliers(d));
+    fetch('/api/admin/manufacturers', { headers }).then(res => res.json()).then(d => setManufacturers(d));
   };
 
   useEffect(() => { if (token) reloadData(); }, [token]);
 
   const handleFormSubmit = async (endpoint, bodyData) => {
-    const res = await fetch(`http://localhost:8080/api/admin/${endpoint}`, {
+    const res = await fetch(`/api/admin/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(bodyData)
@@ -79,7 +81,26 @@ export default function App() {
     }
   };
 
-  if (!token) return <Login onLoginSuccess={(t) => { setToken(t); localStorage.setItem('scms_token', t); }} />;
+  if (!token) {
+    return authView === 'signup' ? (
+      <Signup
+        onSignupSuccess={(t) => {
+          setToken(t);
+          localStorage.setItem('scms_token', t);
+          setAuthView('login');
+        }}
+        onSwitchToLogin={() => setAuthView('login')}
+      />
+    ) : (
+      <Login
+        onLoginSuccess={(t) => {
+          setToken(t);
+          localStorage.setItem('scms_token', t);
+        }}
+        onSwitchToSignup={() => setAuthView('signup')}
+      />
+    );
+  }
 
   return (
     <div className="scms-layout">

@@ -40,27 +40,49 @@ public class PostgresNotificationListener {
     @PostConstruct
     public void startListening() {
         listenerThread = new Thread(() -> {
-            try {
-                // Open a raw connection explicitly for continuous listening
-                connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-                PGConnection pgConnection = connection.unwrap(PGConnection.class);
+            while (running) {
+                try {
+                    // Establishes a raw persistent socket pipeline connection to PostgreSQL
+                    connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+                    PGConnection pgConnection = connection.unwrap(PGConnection.class);
 
-                try (Statement stmt = connection.createStatement()) {
-                    stmt.execute("LISTEN user_notification");
-                }
+                    try (Statement stmt = connection.createStatement()) {
+                        stmt.execute("LISTEN user_notification");
+                    }
 
-                while (running) {
-                    // Check for new notifications from PostgreSQL
-                    PGNotification[] notifications = pgConnection.getNotifications(500); // 500ms timeout
-
-                    if (notifications != null) {
-                        for (PGNotification notification : notifications) {
-                            processNotification(notification.getParameter());
+                    // Keep reading notifications; reconnect if the connection fails
+                    while (running && connection != null && !connection.isClosed()) {
+                        try {
+                            PGNotification[] notifications = pgConnection.getNotifications(500);
+                            if (notifications != null) {
+                                for (PGNotification notification : notifications) {
+                                    processNotification(notification.getParameter());
+                                }
+                            }
+                        } catch (Exception inner) {
+                            System.err.println("Postgres listener I/O error: " + inner.getMessage());
+                            // break inner loop to attempt reconnect
+                            break;
                         }
                     }
+                } catch (Exception e) {
+                    System.err.println("Error establishing PostgreSQL listener: " + e.getMessage());
+                    e.printStackTrace();
+                } finally {
+                    // Ensure connection closed before retrying
+                    try {
+                        if (connection != null && !connection.isClosed()) connection.close();
+                    } catch (Exception ignored) {}
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+
+                // If still running, wait a bit before retrying connection
+                if (running) {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
         });
         listenerThread.setDaemon(true);
@@ -69,17 +91,17 @@ public class PostgresNotificationListener {
 
     private void processNotification(String payload) {
         try {
-            // Parse the JSON text sent by DB trigger
+            // Parse the database trigger's string payload back into clean JSON nodes
             JsonNode rootNode = objectMapper.readTree(payload);
             int userId = rootNode.get("user_id").asInt();
             String message = rootNode.get("message").asText();
 
-            // Push targeted WebSocket message to specific subscriber path: /topic/notifications/{userId}
+            // Direct Handoff point: Spring pushes this straight down to the matching WebSocket topic session!
             String destination = "/topic/notifications/" + userId;
             messagingTemplate.convertAndSend(destination, message);
 
         } catch (Exception e) {
-            System.err.println("Error parsing database notification payload: " + e.getMessage());
+            System.err.println("Failed parsing notification payload string context: " + e.getMessage());
         }
     }
 
@@ -91,7 +113,7 @@ public class PostgresNotificationListener {
                 connection.close();
             }
         } catch (Exception e) {
-            // Log clean up error if necessary
+            // Clean up threads silently on container exit
         }
     }
 }

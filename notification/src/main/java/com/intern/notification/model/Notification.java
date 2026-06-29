@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "user_id", nullable = false)
@@ -20,24 +20,46 @@ public class Notification {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public  Notification() {}
+    // Default Constructor (Required by JPA/Hibernate)
+    public Notification() {}
 
+    // Parameterized Constructor
     public Notification(Integer userId, String message) {
         this.userId = userId;
         this.message = message;
     }
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId() { this.id = id; }
+    // --- CORRECTED GETTERS AND SETTERS ---
 
-    public Integer getUserId() { return  userId; }
-    public void setUserId() { this.userId = userId; }
+    public Long getId() { 
+        return id; 
+    }
+    
+    public void setId(Long id) { 
+        this.id = id; 
+    }
 
-    public  String getMessage() { return  message; }
-    public  void setMessage() { this.message = message; }
+    public Integer getUserId() { 
+        return userId; 
+    }
+    
+    public void setUserId(Integer userId) { 
+        this.userId = userId; 
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public  void setCreatedAt() { this.createdAt = createdAt; }
+    public String getMessage() { 
+        return message; 
+    }
+    
+    public void setMessage(String message) { 
+        this.message = message; 
+    }
 
+    public LocalDateTime getCreatedAt() { 
+        return createdAt; 
+    }
+    
+    public void setCreatedAt(LocalDateTime createdAt) { 
+        this.createdAt = createdAt; 
+    }
 }
