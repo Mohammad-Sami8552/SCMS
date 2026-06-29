@@ -111,7 +111,7 @@ run_all.bat
 
 | Microservice | Technology Stack | Hosting Endpoint Path | Functional Scope |
 | :--- | :--- | :--- | :--- |
-| **SCMS Frontend Client** | React, Vite Engine | `http://localhost:3000` | Primary Dashboard Panel Interface |
+| **SCMS Frontend Client** | React, Vite Engine | `http://localhost:5173` | Primary Dashboard Panel Interface |
 | **SCMS Node API Engine** | Express, Node.js Server | `http://localhost:8080` | Client Data Mapping & JWT Session Validations |
 | **Notification Engine** | Spring Boot, WebSockets | `http://localhost:8081` | Asynchronous Real-Time Pushed Alerts |
 | **Database Server** | PostgreSQL Engine | `localhost:5432` | Data Persistence Storage & Listen/Notify Channels |
@@ -122,7 +122,7 @@ run_all.bat
 
 To verify everything is configured correctly, follow this simple workflow test:
 
-1. Open your browser and head to: `http://localhost:3000`.
+1. Open your browser and head to: `http://localhost:5173`.
 2. Toggle the radio button to **OTP Based Authentication Mode**.
 3. Type in the default administrator username: **`Himanish`**.
 4. Click **Get OTP** (ignore any placeholder alerts).
