@@ -26,7 +26,9 @@ function DraggableModal({ title, onClose, children, width = '550px' }) {
 }
 
 export default function App() {
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem('scms_token') || null);
+  const [username, setUsername] = useState(() => localStorage.getItem('scms_username') || '');
+  const [unreadCount, setUnreadCount] = useState(0);
   const [authView, setAuthView] = useState('login');
 
   const [currentMenu, setCurrentMenu] = useState('store-config'); 
@@ -61,7 +63,30 @@ export default function App() {
     fetch('/api/admin/manufacturers', { headers }).then(res => res.json()).then(d => setManufacturers(d));
   };
 
+  const fetchUnreadCount = async () => {
+    if (!username) return;
+
+    try {
+      const res = await fetch(`http://localhost:8081/api/notifications/unread-count?username=${encodeURIComponent(username)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(Number(data.count) || 0);
+      } else {
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Unable to fetch unread notification count', error);
+      setUnreadCount(0);
+    }
+  };
+
   useEffect(() => { if (token) reloadData(); }, [token]);
+  useEffect(() => {
+    if (!username) return;
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [username]);
 
   const handleFormSubmit = async (endpoint, bodyData) => {
     const res = await fetch(`/api/admin/${endpoint}`, {
@@ -90,9 +115,11 @@ export default function App() {
       />
     ) : (
       <Login
-        onLoginSuccess={(t) => {
+        onLoginSuccess={({ token: t, username: u }) => {
           setToken(t);
+          setUsername(u);
           localStorage.setItem('scms_token', t);
+          localStorage.setItem('scms_username', u);
         }}
         onSwitchToSignup={() => setAuthView('signup')}
       />
@@ -105,10 +132,13 @@ export default function App() {
 
       <div className="main-workspace">
         <header className="navbar-top">
-          <div className="nav-profile"><strong>Himanish Saha</strong> | Administrator | RD Division Store</div>
+          <div className="nav-profile"><strong>{username || 'User'}</strong> | Administrator | RD Division Store</div>
           <div className="nav-actions">
-            <a href="http://localhost:8081/" className="notification-link" title="Notifications">🔔</a>
-            <button className="logout-btn" onClick={() => { setToken(null); localStorage.removeItem('scms_token'); setAuthView('login'); }}>LOGOUT</button>
+            <a href={username ? `http://localhost:8081/?username=${encodeURIComponent(username)}` : 'http://localhost:8081/'} className="notification-link" title="Notifications">
+              🔔
+              {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+            </a>
+            <button className="logout-btn" onClick={() => { setToken(null); setUsername(''); setUnreadCount(0); localStorage.removeItem('scms_token'); localStorage.removeItem('scms_username'); setAuthView('login'); }}>LOGOUT</button>
           </div>
         </header>
 

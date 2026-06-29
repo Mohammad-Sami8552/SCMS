@@ -11,11 +11,17 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Integer userId;
+
+    @Column(name = "receiver_username")
+    private String receiverUsername;
 
     @Column(nullable = false)
     private String message;
+
+    @Column(name = "delivered", columnDefinition = "boolean default false")
+    private boolean delivered = false;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -24,8 +30,14 @@ public class Notification {
     public Notification() {}
 
     // Parameterized Constructor
-    public Notification(Integer userId, String message) {
+    public Notification(String receiverUsername, String message) {
+        this.receiverUsername = receiverUsername;
+        this.message = message;
+    }
+
+    public Notification(Integer userId, String receiverUsername, String message) {
         this.userId = userId;
+        this.receiverUsername = receiverUsername;
         this.message = message;
     }
 
@@ -47,12 +59,28 @@ public class Notification {
         this.userId = userId; 
     }
 
+    public String getReceiverUsername() {
+        return receiverUsername;
+    }
+
+    public void setReceiverUsername(String receiverUsername) {
+        this.receiverUsername = receiverUsername;
+    }
+
     public String getMessage() { 
         return message; 
     }
     
     public void setMessage(String message) { 
         this.message = message; 
+    }
+
+    public boolean isDelivered() {
+        return delivered;
+    }
+
+    public void setDelivered(boolean delivered) {
+        this.delivered = delivered;
     }
 
     public LocalDateTime getCreatedAt() { 

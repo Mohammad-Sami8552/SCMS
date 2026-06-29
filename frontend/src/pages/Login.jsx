@@ -44,7 +44,8 @@ export default function Login({ onLoginSuccess, onSwitchToSignup }) {
 
       const data = await res.json();
       if (res.ok) {
-        onLoginSuccess(data.token);
+        localStorage.setItem('scms_username', username.trim());
+        onLoginSuccess({ token: data.token, username: username.trim() });
       } else {
         setError(data.message || 'Authentication failed');
         loadCaptcha();

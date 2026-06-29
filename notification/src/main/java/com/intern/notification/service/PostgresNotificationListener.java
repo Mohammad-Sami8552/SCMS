@@ -91,13 +91,20 @@ public class PostgresNotificationListener {
 
     private void processNotification(String payload) {
         try {
-            // Parse the database trigger's string payload back into clean JSON nodes
             JsonNode rootNode = objectMapper.readTree(payload);
-            int userId = rootNode.get("user_id").asInt();
-            String message = rootNode.get("message").asText();
+            String receiverUsername = null;
+            if (rootNode.has("receiver_username")) {
+                receiverUsername = rootNode.get("receiver_username").asText();
+            } else if (rootNode.has("username")) {
+                receiverUsername = rootNode.get("username").asText();
+            }
+            String message = rootNode.has("message") ? rootNode.get("message").asText() : null;
 
-            // Direct Handoff point: Spring pushes this straight down to the matching WebSocket topic session!
-            String destination = "/topic/notifications/" + userId;
+            if (receiverUsername == null || receiverUsername.isBlank() || message == null) {
+                return;
+            }
+
+            String destination = "/topic/notifications/" + receiverUsername;
             messagingTemplate.convertAndSend(destination, message);
 
         } catch (Exception e) {
