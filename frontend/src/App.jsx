@@ -26,10 +26,7 @@ function DraggableModal({ title, onClose, children, width = '550px' }) {
 }
 
 export default function App() {
-  const [token, setToken] = useState(() => {
-    const savedToken = localStorage.getItem('scms_token');
-    return (!savedToken || savedToken === 'null' || savedToken === 'undefined') ? null : savedToken;
-  });
+  const [token, setToken] = useState(null);
   const [authView, setAuthView] = useState('login');
 
   const [currentMenu, setCurrentMenu] = useState('store-config'); 
@@ -84,9 +81,9 @@ export default function App() {
   if (!token) {
     return authView === 'signup' ? (
       <Signup
-        onSignupSuccess={(t) => {
-          setToken(t);
-          localStorage.setItem('scms_token', t);
+        onSignupSuccess={() => {
+          setToken(null);
+          localStorage.removeItem('scms_token');
           setAuthView('login');
         }}
         onSwitchToLogin={() => setAuthView('login')}
@@ -111,7 +108,7 @@ export default function App() {
           <div className="nav-profile"><strong>Himanish Saha</strong> | Administrator | RD Division Store</div>
           <div className="nav-actions">
             <a href="http://localhost:8081/" className="notification-link" title="Notifications">🔔</a>
-            <button className="logout-btn" onClick={() => { setToken(null); localStorage.removeItem('scms_token'); }}>LOGOUT</button>
+            <button className="logout-btn" onClick={() => { setToken(null); localStorage.removeItem('scms_token'); setAuthView('login'); }}>LOGOUT</button>
           </div>
         </header>
 

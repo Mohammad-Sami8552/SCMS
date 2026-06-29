@@ -36,7 +36,6 @@ exports.getManufacturers = async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
 
-// --- POST WRITE REQUESTS (WITH IDENTITY PARSING FIXES) ---
 exports.addStore = async (req, res) => {
   const { store_code, store_name, store_type, officer_incharger_name, officer_incharger_mobile_no, officer_incharger_email } = req.body;
   try {

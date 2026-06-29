@@ -4,6 +4,7 @@ export default function Login({ onLoginSuccess, onSwitchToSignup }) {
   const [authMode, setAuthMode] = useState('password');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [otpInput, setOtpInput] = useState('');
   const [captchaInput, setCaptchaInput] = useState('');
   const [serverCaptcha, setServerCaptcha] = useState('');
@@ -75,8 +76,14 @@ export default function Login({ onLoginSuccess, onSwitchToSignup }) {
             style={{ width: '100%', padding: '10px', marginBottom: '14px', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }} />
 
           {authMode === 'password' ? (
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required
-              style={{ width: '100%', padding: '10px', marginBottom: '14px', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }} />
+            <div style={{ position: 'relative', marginBottom: '14px' }}>
+              <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required
+                style={{ width: '100%', padding: '10px 40px 10px 10px', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }} />
+              <button type="button" onClick={() => setShowPassword(prev => !prev)} aria-label={showPassword ? 'Hide password' : 'Show password'}
+                style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: '16px' }}>
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           ) : (
             <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
               <input type="text" placeholder="Enter 6-Digit OTP" value={otpInput} onChange={e => setOtpInput(e.target.value)} required

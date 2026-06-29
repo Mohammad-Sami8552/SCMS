@@ -9,6 +9,7 @@ export default function Signup({ onSignupSuccess, onSwitchToLogin }) {
     email: '',
     phone: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [captchaInput, setCaptchaInput] = useState('');
   const [serverCaptcha, setServerCaptcha] = useState('');
   const [error, setError] = useState('');
@@ -67,7 +68,13 @@ export default function Signup({ onSignupSuccess, onSwitchToLogin }) {
 
         <form onSubmit={handleSignup}>
           <input type="text" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="Username" required style={inputStyle} />
-          <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Password" required style={inputStyle} />
+          <div style={{ position: 'relative', marginBottom: '14px' }}>
+            <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Password" required style={{ ...inputStyle, paddingRight: '40px' }} />
+            <button type="button" onClick={() => setShowPassword(prev => !prev)} aria-label={showPassword ? 'Hide password' : 'Show password'}
+              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: '16px' }}>
+              {showPassword ? '🙈' : '👁️'}
+            </button>
+          </div>
           <input type="text" value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} placeholder="Full Name" required style={inputStyle} />
           <input type="text" value={form.designation} onChange={e => setForm({ ...form, designation: e.target.value })} placeholder="Designation" style={inputStyle} />
           <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="Email" style={inputStyle} />
