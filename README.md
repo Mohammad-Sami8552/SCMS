@@ -128,4 +128,4 @@ To verify everything is configured correctly, follow this simple workflow test:
 4. Click **Get OTP** (ignore any placeholder alerts).
 5. Input the sandboxed bypass validation passcode string: **`123456`**.
 6. Match your input cleanly with the active alphanumeric **CAPTCHA string** code shown in the dark box, and click **Sign In**.
-7. Once inside the main dashboard view, click the built-in **Notification Telemetry** link helper but
+7. Once inside the main dashboard view, click the built-in **Notification Telemetry** link helper.
